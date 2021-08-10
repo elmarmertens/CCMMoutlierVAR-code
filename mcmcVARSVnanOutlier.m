@@ -310,19 +310,11 @@ while m < MCMCreps % using while, not for loop to allow going back in MCMC chain
         miss.Y               = Y(Tstar+1:end,:)';
         miss.Y(miss.Ynan)    = 0; % set missing values to zeros;
         
-        %         if m == 1
-        %             miss.A(ndxfcstY, :)  = (MU_pai + 0.1 * sqrt(diagOMEGA_pai) .* randn(rndStream, K, N))'; % helps to avoid numerical issues
-        %         else
-        %             miss.A(ndxfcstY, :)  = PAI';
-        %         end
         miss.A(ndxfcstY, :)  = PAI';
         miss.B(ndxfcstY,:)   = invA_;
         
         % map SV into sqrtSigma
         miss.sqrtSigma = sqrtht(Tstar+1:end,:)';
-        
-        %         missStatesXXX  = stateABCdraw1delta(miss.A, miss.B, miss.C, miss.Y, miss.Ynan, ...
-        %             miss.X0, miss.sqrtSigma, rndStream);
         
         missStates = stateABnanDraw(miss.A, miss.B, ndxfcstY, miss.Y, miss.Ynan, ...
             miss.X0, miss.sqrtSigma, rndStream);
