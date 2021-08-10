@@ -11,7 +11,7 @@ All core scripts are in the main directory. In addition, there are the following
 - `data` for data construction
 - `matlabtoolbox` for general utilities (also available at https://github.com/elmarmertens/em-matlabbox)
 
-The default data file is `fredMD16-2021-04.csv` (based on the 2021-04 vintage of FRED-MD).
+The default data file is `fredMD16-2021-04.csv` (based on the 2021-04 vintage of FRED-MD, available at https://research.stlouisfed.org/econ/mccracken/fred-databases/).
 
 ## General notes
 
