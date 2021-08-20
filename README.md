@@ -4,6 +4,8 @@ Andrea Carriero (Queen Mary University of London), Todd Clark (Federal Reserve B
 
 The usual disclaimers apply; the views and results conveyed in our research are solely those of the authors and do not necessarily reflect the views of the Federal Reserve Bank of Cleveland, the Federal Reserve System, the Eurosystem, or the Deutsche Bundesbank.
 
+The working paper and supplementary appendices are available here: https://doi.org/10.26509/frbc-wp-202102r
+
 *WORK IN PROGRESS*
 
 ## Directories
