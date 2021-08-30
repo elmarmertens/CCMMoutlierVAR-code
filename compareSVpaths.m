@@ -19,7 +19,6 @@ matSVO        = matfile(fullfile(datadir, 'fredMD16-2021-04-censoredYields-SVOma
 matSVoutmiss  = matfile(fullfile(datadir, 'fredMD16-2021-04-censoredYields-SVnanO5-p12.mat'));
 matSVt        = matfile(fullfile(datadir, 'fredMD16-2021-04-censoredYields-SVt-p12.mat'));
 matSVOt       = matfile(fullfile(datadir, 'fredMD16-2021-04-censoredYields-SVOtmax20-p12.mat'));
-% matSVOt2      = matfile(fullfile(datadir, 'fredMD16-2021-04-censoredYields-SVOtmax20-hipriorprob-p12.mat'));
 matSVobar     = matfile(fullfile(datadir, 'fredMD16-2021-04-censoredYields-SVobarmax20-p12.mat'));
 
 wrap = [];
@@ -89,16 +88,6 @@ for ndxT = find(ydates(Tjumpoffs) == datenum(2020,1,1))
         xticks(tickdates)
         ylimSVOt = ylim;
         
-        %         svotfig2 = figure;
-        %         axSVOt2 = gca;
-        %         set(axSVOt2, 'fontsize', fontsize)
-        %         hold on
-        %         plot(ydates, matSVOt2.drawsSVmid(n,:,ndxT), 'm:', 'linewidth', 3);
-        %         plot(ydates, matSVOt2.drawsLambdaSVmid(n,:,ndxT), 'k-', 'linewidth', 2)
-        %         xtickdates(datelim)
-        %         xticks(tickdates)
-        %         ylimSVOt2 = ylim;
-        
         svtfig = figure;
         axSVt = gca;
         set(axSVt, 'fontsize', fontsize)
@@ -124,27 +113,22 @@ for ndxT = find(ydates(Tjumpoffs) == datenum(2020,1,1))
         %         ylim(axSV, lims)
         ylim(axSVO, lims)
         ylim(axSVOt, lims)
-        %         ylim(axSVOt2, lims)
         ylim(axSVt, lims)
-        %         ylim(axSVobar, lims)
         
         wrapthisfigure(svfig, sprintf('stochvol-SV-%s-%s', ncode{n}, datestr(ydates(thisT), 'mmmyyyy')), wrap, [], [], [], [], true);
         wrapthisfigure(svtfig, sprintf('stochvol-SVt-%s-%s', ncode{n}, datestr(ydates(thisT), 'mmmyyyy')), wrap, [], [], [], [], true);
         wrapthisfigure(svotfig, sprintf('stochvol-SVOt-%s-%s', ncode{n}, datestr(ydates(thisT), 'mmmyyyy')), wrap, [], [], [], [], true);
-        %         wrapthisfigure(svotfig2, sprintf('stochvol-SVOt2-%s-%s', ncode{n}, datestr(ydates(thisT), 'mmmyyyy')), wrap, [], [], [], [], true);
         wrapthisfigure(svofig, sprintf('stochvol-SVO-%s-%s', ncode{n}, datestr(ydates(thisT), 'mmmyyyy')), wrap, [], [], [], [], true);
         wrapthisfigure(svobarfig, sprintf('stochvol-SVobar-%s-%s', ncode{n}, datestr(ydates(thisT), 'mmmyyyy')), wrap, [], [], [], [], true);
         
         title(axSV, sprintf('SV \n%s', datestr(ydates(thisT), 'mmm yyyy')))
         title(axSVt, sprintf('SV-t \n%s', datestr(ydates(thisT), 'mmm yyyy')))
         ht = title(axSVOt, sprintf('SVO-t \n%s', datestr(ydates(thisT), 'mmm yyyy')));
-        %         title(axSVOt2, sprintf('SVO-t ALT \n%s', datestr(ydates(thisT), 'mmm yyyy')))
         title(axSVO, sprintf('SVO \n%s', datestr(ydates(thisT), 'mmm yyyy')))
         title(axSVobar, sprintf('SV-o \n%s', datestr(ydates(thisT), 'mmm yyyy')))
         wrapthisfigure(svfig, sprintf('stochvol-SV-%s-%s-WITHTITLE', ncode{n}, datestr(ydates(thisT), 'mmmyyyy')), wrap, [], [], [], [], false);
         wrapthisfigure(svtfig, sprintf('stochvol-SVt-%s-%s-WITHTITLE', ncode{n}, datestr(ydates(thisT), 'mmmyyyy')), wrap, [], [], [], [], false);
         wrapthisfigure(svotfig, sprintf('stochvol-SVOt-%s-%s-WITHTITLE', ncode{n}, datestr(ydates(thisT), 'mmmyyyy')), wrap, [], [], [], [], false);
-        %         wrapthisfigure(svotfig2, sprintf('stochvol-SVOt2-%s-%s-WITHTITLE', ncode{n}, datestr(ydates(thisT), 'mmmyyyy')), wrap, [], [], [], [], false);
         wrapthisfigure(svofig, sprintf('stochvol-SVO-%s-%s-WITHTITLE', ncode{n}, datestr(ydates(thisT), 'mmmyyyy')), wrap, [], [], [], [], false);
         wrapthisfigure(svobarfig, sprintf('stochvol-SVobar-%s-%s-WITHTITLE', ncode{n}, datestr(ydates(thisT), 'mmmyyyy')), wrap, [], [], [], [], false);
         
