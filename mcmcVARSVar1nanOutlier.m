@@ -325,7 +325,7 @@ while m < MCMCreps % using while, not for loop to allow going back in MCMC chain
         miss.sqrtSigma = sqrtht(Tstar+1:end,:)';
         
         
-        missStates = stateABnanDraw(miss.A, miss.B, ndxfcstY, miss.Y, miss.Ynan, ...
+        missStates = stateABnanDraw1(miss.A, miss.B, ndxfcstY, miss.Y, miss.Ynan, ...
             miss.X0, miss.sqrtSigma, rndStream);
         
         
