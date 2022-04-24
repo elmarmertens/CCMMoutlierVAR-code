@@ -250,8 +250,6 @@ for sam = 1 : 4
         
         
     end
-%     % finish evalstop loop
-%     finishwrap
 end
 
 %% finish script

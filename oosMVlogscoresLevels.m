@@ -26,6 +26,8 @@ initwrap
 
 %% define models
 
+% note: for SVO/SVOt set useRB to true to use the RB scores (for other models, the standard scores use RB anyway)
+
 % CONST
 m = 1; % m + 1;
 models(m).datalabel    = 'fredMD16levels-2021-04';
@@ -59,14 +61,14 @@ m = m + 1;
 models(m).datalabel    = 'fredMD16levels-2021-04';
 models(m).resultlabel  = 'censoredYields-SVOtmax20-p12';
 models(m).prettylabel  = 'SVO-t';
-models(m).useRB        = false;
+models(m).useRB        = true;
 
 % SV-OutMiss
 % m = m + 1;
 % models(m).datalabel    = 'fredMD16levels-2021-04';
 % models(m).resultlabel  = 'censoredYields-SVnanO5-p12';
 % models(m).prettylabel  = 'OutMiss';
-models(m).useRB        = false;
+% models(m).useRB        = false;
 
 models   = models([5 3 4 1 2]); % order benchmark last
 

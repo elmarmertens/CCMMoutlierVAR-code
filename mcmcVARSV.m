@@ -46,7 +46,7 @@ end
 % stationary variables this is set to 0.
 
 burnin            = 2 * ceil(0.1*MCMCdraws);    % burn in
-MCMCreps           = MCMCdraws + burnin;        % total MCMC draws
+MCMCreps          = MCMCdraws + burnin;        % total MCMC draws
 
 
 %% -------------------------Create data matrices-------------------------
@@ -382,7 +382,6 @@ fcstLogscoreDraws = reshape(fcstLogscoreDraws, fcstNdraws, 1);
 
 fcstYhatRB     = mean(yhatdraws,3);
 fcstYhat       = mean(fcstYdraws,3);
-
 fcstSVdraws    = reshape(fcstSVdraws, N, fcstNhorizons, fcstNdraws);
 
 

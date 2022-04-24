@@ -12,9 +12,9 @@ addpath matlabtoolbox/emstatespace/
 %% Initial operations
 clear; close all; clc;
 
-datadir = '~/jam/lager/var2021-matfiles';
+datadir = '~/jam/lager/var2021-matfiles/baseline';
 
-doSVtdof = true;
+doSVtdof = false;
 
 matSV         = matfile(fullfile(datadir, 'fredMD16-2021-04-censoredYields-SV-p12.mat'));
 matSVO        = matfile(fullfile(datadir, 'fredMD16-2021-04-censoredYields-SVOmax20-p12.mat'));
@@ -32,7 +32,7 @@ end
 wrap = [];
 initwrap
 
-do2 = false;
+do2 = true;
  %#ok<*UNRCH>
  
 %% pull some objects

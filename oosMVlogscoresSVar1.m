@@ -26,6 +26,8 @@ initwrap
 
 %% define models
 
+% note: for SVO/SVOt set useRB to true to use the RB scores (for other models, the standard scores use RB anyway)
+
 % SV
 m = 1; % m + 1;
 models(m).datalabel    = 'fredMD16-2021-04';

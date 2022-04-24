@@ -194,7 +194,7 @@ end
 
 
 
-% map FRED-MD into list of 20
+% map FRED-MD into list 
 [~,ndxVariableSelection] = ismember(codeVariableSelection, names);
 
 % collect data and names
@@ -211,7 +211,6 @@ tabledata = data(:,ndxVariableSelection);
 
 
 varnames = matlab.lang.makeValidName(varnames, 'ReplacementStyle', 'delete'); % to get rid of '&' and other unwanted signs, seems necessary at least under linux
-
 
 %% check for outliers
 close all

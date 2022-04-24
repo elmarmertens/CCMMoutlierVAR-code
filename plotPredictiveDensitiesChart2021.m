@@ -16,7 +16,7 @@ addpath matlabtoolbox/emeconometrics/
 addpath matlabtoolbox/emstatespace/
 
 %% setup
-resultsdir = '~/jam/lager/var2021-matfiles';
+resultsdir = '~/jam/lager/var2021-matfiles/baseline';
 
 startSam   = [];
 datalabel  = 'fredMD16-2021-04';
@@ -43,7 +43,7 @@ doRow1  = true;
 doRow2  = true;
 doRow3  = true;
 
-doSVobar = true;
+doSVobar = false;
 
 
 doCompareSVt  = false;
@@ -72,9 +72,6 @@ prettylabelSV  = 'SV';
 mfilename      = sprintf('%s-SV%s-p%d.mat', modellabel, do2020, p);
 matSV          = matfile(fullfile(resultsdir, mfilename), 'writable', false);
 
-prettylabelSVtdof = 'SV-t(5)';
-mfilename         = sprintf('%s-SVt-dof5%s-p%d.mat', modellabel, do2020, p);
-matSVtdof         = matfile(fullfile(resultsdir, mfilename), 'writable', false);
 
 prettylabelSVt = 'SV-t';
 mfilename      = sprintf('%s-SVt%s-p%d.mat', modellabel, do2020, p);
@@ -98,9 +95,6 @@ dummyPrecision      = 0;
 mfilename           = sprintf('%s-SV-COVIDEACH-precision%d-p%d.mat', modellabel, dummyPrecision, p);
 matSVdummy          = matfile(fullfile(resultsdir, mfilename), 'writable', false);
 
-prettylabelSVOtdof     = 'SVO-t(9)';
-mfilename           = sprintf('%s-SVOtmax20-dof9%s-p%d.mat', modellabel, do2020, p);
-matSVOtdof             = matfile(fullfile(resultsdir, mfilename), 'writable', false);
 
 prettylabelSVOt     = 'SVO-t';
 mfilename           = sprintf('%s-SVOtmax20%s-p%d.mat', modellabel, do2020, p);
@@ -206,12 +200,6 @@ ndx                     = find(ismember(Tjumpoffs, thismat.Tjumpoffs));
 fcstTailsSVt(:,:,:,ndx)  = squeeze(thismat.fcstYquantiles(:,:,ndxCI,:));
 fcstMidSVt(:,:,ndx)      = thismat.fcstYmedian;
 
-thismat = matSVtdof;
-fcstTailsSVtdof  = NaN(size(fcstTailsCONST));
-fcstMidSVtdof    = NaN(size(fcstMidCONST));
-ndx                     = find(ismember(Tjumpoffs, thismat.Tjumpoffs));
-fcstTailsSVtdof(:,:,:,ndx)  = squeeze(thismat.fcstYquantiles(:,:,ndxCI,:));
-fcstMidSVtdof(:,:,ndx)      = thismat.fcstYmedian;
 
 thismat = matSVOt;
 fcstTailsSVOt  = NaN(size(fcstTailsCONST));
@@ -220,12 +208,6 @@ ndx                     = find(ismember(Tjumpoffs, thismat.Tjumpoffs));
 fcstTailsSVOt(:,:,:,ndx)  = squeeze(thismat.fcstYquantiles(:,:,ndxCI,:));
 fcstMidSVOt(:,:,ndx)      = thismat.fcstYmedian;
 
-thismat = matSVOtdof;
-fcstTailsSVOtdof  = NaN(size(fcstTailsCONST));
-fcstMidSVOtdof    = NaN(size(fcstMidCONST));
-ndx                     = find(ismember(Tjumpoffs, thismat.Tjumpoffs));
-fcstTailsSVOtdof(:,:,:,ndx)  = squeeze(thismat.fcstYquantiles(:,:,ndxCI,:));
-fcstMidSVOtdof(:,:,ndx)      = thismat.fcstYmedian;
 
 
 thismat = matSVoutMiss;

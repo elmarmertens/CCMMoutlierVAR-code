@@ -503,7 +503,7 @@ end
 if ~contains(lower(tabcaption), 'log-score')
     if any(sigone, 'all')
         if sum(sigone(:)) > 1
-            fprintf(fid, 'Due to the close behavior of some of the models compared, and rounding of the report values, a few comparisons show significant relative %s of 1.00.\n', thisStat);
+            fprintf(fid, 'Due to the close behavior of some of the models compared, and rounding of the report values, a few comparisons show a significant relative %s of 1.00.\n', thisStat);
             fprintf(fid, 'These cases arise from persistent differences in performance that are, however, too small to be relevant after rounding.\n');
         else
             fprintf(fid, 'Due to the close behavior of some of the models compared, and rounding of the report values, one of the comparisons shows a significant relative %s of 1.00.\n', thisStat);
