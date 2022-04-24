@@ -36,25 +36,10 @@ datestrfmt = 'mmmm yyyy';
 %#ok<*UNRCH>
 
 %% select plots
-doSV    = false;  % const vs sv
 
-doRow1        = true;
-doRow2        = true;
-doRow3        = true;
-doSVdummy     = false;
-
-doSVobar = false;
-
-doShowOnlyLatest = false;
-
-corelist = [1 5 6 12];
-
-% ylist = corelist; 
-
-% ylist = 6;
-ylist    = 1 : 16;
-
-ylist    = ylist(~ismember(ylist,corelist));
+doFullYlist = false;
+doFig3 = false;
+doFig4 = true;
 
 
 %% load matfiles (oos runs)
@@ -252,7 +237,7 @@ if ~isempty(wrap)
     tabname = sprintf('datalist-%s.tex', datalabel);
     filename = fullfile(wrap.dir, tabname);
     fid = fopen(filename, 'wt');
-    
+
     fprintf(fid, '\\begin{center}\n');
     fprintf(fid, '\\begin{tabular}{lll}\n');
     fprintf(fid, '\\toprule\n');
@@ -262,7 +247,7 @@ if ~isempty(wrap)
     for n = 1 : N
         fprintf(fid, '%s ', Ylabels{n});
         fprintf(fid, '& %s ', ncode{n});
-        
+
         switch tcode(n)
             case 1
                 % % no transformation
@@ -275,7 +260,7 @@ if ~isempty(wrap)
             otherwise
                 error houston
         end
-        
+
         fprintf(fid, '\\\\\n');
     end
     fprintf(fid, '\\bottomrule\n');
@@ -292,117 +277,35 @@ if ~isempty(wrap)
     latexwrapper(wrap, 'add', 'sidetab', tabname, [])
 end
 
-%% select dates to be shown
-ndxRange = find(ydates(Tjumpoffs) >= datenum(2020,1,1));
-
-ndxRange = ndxRange(:)'; % ensure it is a row vector
-
-if doShowOnlyLatest
-    ndxRange = ndxRange(end);
-end
-    
 darkgreen = [0 .75 0];
 black     = [0 0 0];
 
 tickdates = [datenum(2019,[6 12],1),datenum(2020,[6 12],1), datenum(2021,[6 12],1), datenum(2022,[6 12],1), datenum(2023,[6 12],1)];
 
-%% plot CONST vs SV
-if doSV
-    close all
-    thisPlotLabel = 'predictiveDensityCONSTvsSV';
-    for n = ylist
-        
-        for ndxT = ndxRange(1)
-            
-            jumpoff   = Tjumpoffs(ndxT);
-            thisdateT = ydates(jumpoff);
-            
-            %% compare predictive densities (jumpoff)
-            jj                = find(fcstdates == ydates(jumpoff));
-            allthesedates     = fcstdates(jj-np:jj+fcstNhorizons);
-            theseFcstdates    = fcstdates(jj+(1:fcstNhorizons));
-            theseJumpoffdates = fcstdates(jj+(-np:0));
-            if ~isequal(theseJumpoffdates, ydates(jj+(-np:0)))
-                error houston
-            end
-            
-            theseRealized = NaN(fcstNhorizons+1, 1);
-            ndx = jj+(0:fcstNhorizons);
-            ndx = ndx(ndx <= Tdata);
-            theseRealized(1 : length(ndx)) = data(ndx,n);
-            theseFcstdatesCumJumpoff = [theseJumpoffdates(end); theseFcstdates];
-            
-            
-            hanni = NaN(2,1);
-            
-            
-            %% plot
-            thisfig   = figure;
-            set(thisfig,'defaultLegendAutoUpdate','off');
-            ax = gca;
-            set(ax, 'fontsize', fontsize)
-            hold on
-            hanni(1)   = plotCI(fcstMidCONST(n,:,ndxT), squeeze(fcstTailsCONST(n,:,:,ndxT)), ...
-                theseFcstdates, [], 'k-', 'linewidth', 3);
-            
-            hanni(2)   = plot(theseFcstdates,fcstMidSV(n,:,ndxT), 'r--', 'linewidth', 3);
-            plot(theseFcstdates,squeeze(fcstTailsSV(n,:,:,ndxT)), 'r--', 'linewidth', 2);
-            
-            %         hanni(3)   = plot(theseFcstdates,fcstMidSVO(n,:,ndxT), 'b-.', 'linewidth', 3);
-            %         plot(theseFcstdates,squeeze(fcstTailsSVO(n,:,:,ndxT)), 'b-.', 'linewidth', 2);
-            
-            plot(theseJumpoffdates, data(jj+(-np:0),n), '-', 'color', darkgreen, 'linewidth', 2);
-            if doConnectDots
-                plot([theseJumpoffdates(end) theseFcstdates(1)], [data(jj,n) fcstMidCONST(n,1,ndxT)], ':', 'color', black, 'linewidth', 2);
-            end
-            
-            if min(ylim) < 0 && max(ylim) > 0, plotOrigin, end
-            
-            xlim(allthesedates([1 end]))
-            datetick('x', 'yyyy', 'keeplimits')
-            ax.XAxis.MinorTick       = 'on';
-            
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            ht = title(sprintf('%s', datestr(thisdateT, datestrfmt)));
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHTITLE', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            hl = legend(hanni(1:2), prettylabelCONST, prettylabelSV, ...
-                'location', 'best');
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHTITLELEGEND', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            delete(ht)
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHLEGEND', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            hd = plot(theseFcstdates, theseRealized(2:end), 'd', 'color', darkgreen, 'linewidth', 2);
-            plot(theseFcstdatesCumJumpoff, theseRealized, ':', 'color', darkgreen, 'linewidth', 2);
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHTITLEDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], false)
-            
-            delete(ht);
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            
-            
-            tabulatePanel2(wrap, thisPlotLabel, n, ndxT, thisdateT, theseFcstdates, ...
-                prettylabelCONST, prettylabelSV, ...
-                fcstMidCONST, fcstMidSV, ...
-                fcstTailsCONST, fcstTailsSV, ...
-                ncode, ndxCI, setQuantiles)
-        end
-    end
-end
 
-%% plot CONST vs SV vs SVOt
-if doRow1
+
+%% FIG3: plot CONST vs SV vs SVOt
+if doFig3
+
+    if doFullYlist
+        ylist = 1:N;
+    else
+        ylist  = [1 6];
+    end
+
+    ndxRange = find(any(ydates(Tjumpoffs) == datenum(2020,[3 4 6],1),2));
+    ndxRange = ndxRange(:)'; % ensure it is a row vector
+
+
     close all
     thisPlotLabel = 'predictiveDensityCONSTvsSVvsSVOt';
     for n = ylist
-        
+
         for ndxT = ndxRange
-            
+
             jumpoff   = Tjumpoffs(ndxT);
             thisdateT = ydates(jumpoff);
-            
+
             %% compare predictive densities (jumpoff)
             jj                = find(fcstdates == ydates(jumpoff));
             %             allthesedates     = fcstdates(jj:jj+fcstNhorizons);
@@ -411,17 +314,17 @@ if doRow1
             %             if ~isequal(theseJumpoffdates, ydates(jj+(-np:0)))
             %                 error houston
             %             end
-            
+
             theseRealized = NaN(fcstNhorizons, 1);
             ndx = jj+(1:fcstNhorizons);
             ndx = ndx(ndx <= Tdata);
             theseRealized(1 : length(ndx)) = data(ndx,n);
             %             theseFcstdatesCumJumpoff = [theseJumpoffdates(end); theseFcstdates];
-            
-            
+
+
             hanni = NaN(3,1);
-            
-            
+
+
             %% plot
             thisfig   = figure;
             set(thisfig,'defaultLegendAutoUpdate','off');
@@ -430,399 +333,89 @@ if doRow1
             hold on
             hanni(1)   = plotCI(fcstMidCONST(n,:,ndxT), squeeze(fcstTailsCONST(n,:,:,ndxT)), ...
                 theseFcstdates, [], 'k-', 'linewidth', 3);
-            
+
             hanni(2)   = plot(theseFcstdates,fcstMidSV(n,:,ndxT), 'r--', 'linewidth', 3);
             plot(theseFcstdates,squeeze(fcstTailsSV(n,:,:,ndxT)), 'r--', 'linewidth', 2);
-            
+
             hanni(3)   = plot(theseFcstdates,fcstMidSVOt(n,:,ndxT), 'b-.', 'linewidth', 3);
             plot(theseFcstdates,squeeze(fcstTailsSVOt(n,:,:,ndxT)), 'b-.', 'linewidth', 2);
-            
+
             %             plot(theseJumpoffdates, data(jj+(-np:0),n), '-', 'color', darkgreen, 'linewidth', 2);
             %             if doConnectDots
             %                 plot([theseJumpoffdates(end) theseFcstdates(1)], [data(jj,n) fcstMidCONST(n,1,ndxT)], ':', 'color', black, 'linewidth', 2);
             %             end
-            
+
+            %             switch n
+            %                 case 1
+            %                     ylim([-400 400])
+            %                 case 6
+            %                     ylim([-200 100])
+            %             end
+
             if min(ylim) < 0 && max(ylim) > 0, plotOrigin, end
-            
+
             xlim(theseFcstdates([1 end]))
             xticks(tickdates)
             datetick('x', 'yyyy:mm', 'keeplimits', 'keepticks')
             ax.XAxis.MinorTick       = 'on';
-            
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
+
+            wrapthisfigureBW(thisfig, sprintf('%s-%s-%s', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
+
             ht = title(sprintf('%s', datestr(thisdateT, datestrfmt)));
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHTITLE', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
+            wrapthisfigureBW(thisfig, sprintf('%s-%s-%s-WITHTITLE', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
+
             hl = legend(hanni, prettylabelCONST, prettylabelSV, prettylabelSVOt, ...
                 'location', 'best');
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHTITLELEGEND', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
+            wrapthisfigureBW(thisfig, sprintf('%s-%s-%s-WITHTITLELEGEND', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
+
             delete(ht)
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHLEGEND', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
+            wrapthisfigureBW(thisfig, sprintf('%s-%s-%s-WITHLEGEND', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
+
             delete(hl);
             ht = title(sprintf('%s', datestr(thisdateT, datestrfmt)));
-            hd = plot(theseFcstdates, theseRealized, 'd', 'color', darkgreen, 'linewidth', 2);
-            plot(theseFcstdates, theseRealized, ':', 'color', darkgreen, 'linewidth', 2);
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHTITLEDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], false)
-            
+            hd = plot(theseFcstdates, theseRealized, '*', 'color', darkgreen, 'linewidth', 2, 'markersize', 10);
+            %             plot(theseFcstdates, theseRealized, ':', 'color', darkgreen, 'linewidth', 2);
+            wrapthisfigureBW(thisfig, sprintf('%s-%s-%s-WITHTITLEDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], false)
+
             delete(ht);
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
+            wrapthisfigureBW(thisfig, sprintf('%s-%s-%s-WITHDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
+
             hl = legend([hanni; hd], prettylabelCONST, prettylabelSV, prettylabelSVOt, 'realized', ...
                 'location', 'best');
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHLEGENDDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            
-            tabulatePanel(wrap, thisPlotLabel, n, ndxT, thisdateT, theseFcstdates, ...
-                prettylabelCONST, prettylabelSV, prettylabelSVOt, ...
-                fcstMidCONST, fcstMidSV, fcstMidSVOt, ...
-                fcstTailsCONST, fcstTailsSV, fcstTailsSVOt, ...
-                ncode, ndxCI, setQuantiles)
-            
-        end
-    end
-    
-end
+            wrapthisfigureBW(thisfig, sprintf('%s-%s-%s-WITHLEGENDDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
 
-%% plot SVO vs SVt
-if doRow2
-    close all
-    thisPlotLabel = 'predictiveDensitySVOt';
-    for n = ylist
-        
-        for ndxT = ndxRange
-            
-            jumpoff   = Tjumpoffs(ndxT);
-            thisdateT = ydates(jumpoff);
-            
-            
-            %% compare predictive densities (jumpoff)
-            jj                = find(fcstdates == ydates(jumpoff));
-            % allthesedates     = fcstdates(jj-np:jj+fcstNhorizons);
-            theseFcstdates    = fcstdates(jj+(1:fcstNhorizons));
-            % theseJumpoffdates = fcstdates(jj+(-np:0));
-            % if ~isequal(theseJumpoffdates, ydates(jj+(-np:0)))
-            %     error houston
-            % end
-            
-            theseRealized = NaN(fcstNhorizons, 1);
-            ndx = jj+(1:fcstNhorizons);
-            ndx = ndx(ndx <= Tdata);
-            theseRealized(1 : length(ndx)) = data(ndx,n);
-            % theseFcstdatesCumJumpoff = [theseJumpoffdates(end); theseFcstdates];
-            
-            
-            hanni = NaN(3,1);
-            
-            
-            %% plot
-            thisfig   = figure;
-            set(thisfig,'defaultLegendAutoUpdate','off');
-            ax = gca;
-            set(ax, 'fontsize', fontsize)
-            hold on
-            hanni(1)   = plotCIaltcolor(fcstMidSVOt(n,:,ndxT), squeeze(fcstTailsSVOt(n,:,:,ndxT)), ...
-                theseFcstdates, [], 'b-', 'linewidth', 3);
-            
-            hanni(2)   = plot(theseFcstdates,fcstMidSVO(n,:,ndxT), 'k-.', 'linewidth', 3);
-            plot(theseFcstdates,squeeze(fcstTailsSVO(n,:,:,ndxT)), 'k-.', 'linewidth', 2);
-            
-            hanni(3)   = plot(theseFcstdates,fcstMidSVt(n,:,ndxT), 'r--', 'linewidth', 3);
-            hh = plot(theseFcstdates,squeeze(fcstTailsSVt(n,:,:,ndxT)), 'r--', 'linewidth', 2);
-            hanni(3) = hh(1);
-            
-            %         hanni(4)   = plot(theseFcstdates,fcstMidSVOt(n,:,ndxT), 'c:', 'linewidth', 3);
-            %         plot(theseFcstdates,squeeze(fcstTailsSVOt(n,:,:,ndxT)), 'c:', 'linewidth', 2);
-            
-            
-            % plot(theseJumpoffdates, data(jj+(-np:0),n), '-', 'color', darkgreen, 'linewidth', 2);
-            % if doConnectDots
-            %     plot([theseJumpoffdates(end) theseFcstdates(1)], [data(jj,n) fcstMidSVt(n,1,ndxT)], ':', 'color', black, 'linewidth', 2);
-            % end
-            
-            if min(ylim) < 0 && max(ylim) > 0, plotOrigin, end
-            
-            xlim(theseFcstdates([1 end]))
-            xticks(tickdates)
-            datetick('x', 'yyyy:mm', 'keeplimits', 'keepticks')
-            ax.XAxis.MinorTick       = 'on';
-            
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            ht = title(sprintf('%s', datestr(thisdateT, datestrfmt)));
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHTITLE', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            hl = legend(hanni, prettylabelSVOt, prettylabelSVO, prettylabelSVt, ...
-                'location', 'best');
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHTITLELEGEND', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            delete(ht)
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHLEGEND', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            delete(hl);
-            ht = title(sprintf('%s', datestr(thisdateT, datestrfmt)));
-            hd = plot(theseFcstdates, theseRealized, 'd', 'color', darkgreen, 'linewidth', 2);
-            plot(theseFcstdates, theseRealized, ':', 'color', darkgreen, 'linewidth', 2);
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHTITLEDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], false)
-            
-            delete(ht);
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            hl = legend([hanni; hd], prettylabelSVOt, prettylabelSVO, prettylabelSVt, 'realized', ...
-                'location', 'best');
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHLEGENDDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            %         tabulatePanel(wrap, thisPlotLabel, n, ndxT, thisdateT, theseFcstdates, ...
-            %             prettylabelSV, prettylabelSVO, prettylabelSVt, ...
-            %             fcstMidSV, fcstMidSVO, fcstMidSVt, ...
-            %             fcstTailsSV, fcstTailsSVO, fcstTailsSVt, ...
-            %             ncode, ndxCI, setQuantiles)
+
+            %             tabulatePanel(wrap, thisPlotLabel, n, ndxT, thisdateT, theseFcstdates, ...
+            %                 prettylabelCONST, prettylabelSV, prettylabelSVOt, ...
+            %                 fcstMidCONST, fcstMidSV, fcstMidSVOt, ...
+            %                 fcstTailsCONST, fcstTailsSV, fcstTailsSVOt, ...
+            %                 ncode, ndxCI, setQuantiles)
+
         end
     end
 end
 
-%% plot SVobar vs SVt
-if doSVobar
-    close all
-    thisPlotLabel = 'predictiveDensitySVobar';
-    for n = ylist
-        
-        for ndxT = ndxRange
-            
-            jumpoff   = Tjumpoffs(ndxT);
-            thisdateT = ydates(jumpoff);
-            
-            
-            %% compare predictive densities (jumpoff)
-            jj                = find(fcstdates == ydates(jumpoff));
-            allthesedates     = fcstdates(jj-np:jj+fcstNhorizons);
-            theseFcstdates    = fcstdates(jj+(1:fcstNhorizons));
-            theseJumpoffdates = fcstdates(jj+(-np:0));
-            if ~isequal(theseJumpoffdates, ydates(jj+(-np:0)))
-                error houston
-            end
-            
-            theseRealized = NaN(fcstNhorizons+1, 1);
-            ndx = jj+(0:fcstNhorizons);
-            ndx = ndx(ndx <= Tdata);
-            theseRealized(1 : length(ndx)) = data(ndx,n);
-            theseFcstdatesCumJumpoff = [theseJumpoffdates(end); theseFcstdates];
-            
-            
-            hanni = NaN(3,1);
-            
-            
-            %% plot
-            thisfig   = figure;
-            set(thisfig,'defaultLegendAutoUpdate','off');
-            ax = gca;
-            set(ax, 'fontsize', fontsize)
-            hold on
-            hanni(1)   = plotCIaltcolor(fcstMidSVOt(n,:,ndxT), squeeze(fcstTailsSVOt(n,:,:,ndxT)), ...
-                theseFcstdates, [], 'b-', 'linewidth', 3);
-            
-            hanni(2)   = plot(theseFcstdates,fcstMidSVO(n,:,ndxT), 'k-.', 'linewidth', 3);
-            plot(theseFcstdates,squeeze(fcstTailsSVO(n,:,:,ndxT)), 'k-.', 'linewidth', 2);
-            
-            hanni(3)   = plot(theseFcstdates,fcstMidSVobar(n,:,ndxT), 'r--', 'linewidth', 3);
-            hh = plot(theseFcstdates,squeeze(fcstTailsSVobar(n,:,:,ndxT)), 'r--', 'linewidth', 2);
-            hanni(3) = hh(1);
-            
-            %         hanni(4)   = plot(theseFcstdates,fcstMidSVOt(n,:,ndxT), 'c:', 'linewidth', 3);
-            %         plot(theseFcstdates,squeeze(fcstTailsSVOt(n,:,:,ndxT)), 'c:', 'linewidth', 2);
-            
-            
-            plot(theseJumpoffdates, data(jj+(-np:0),n), '-', 'color', darkgreen, 'linewidth', 2);
-            %             if doConnectDots
-            %                 plot([theseJumpoffdates(end) theseFcstdates(1)], [data(jj,n) fcstMidSVt(n,1,ndxT)], ':', 'color', black, 'linewidth', 2);
-            %             end
-            
-            if min(ylim) < 0 && max(ylim) > 0, plotOrigin, end
-            
-            xlim(allthesedates([1 end]))
-            datetick('x', 'yyyy', 'keeplimits')
-            ax.XAxis.MinorTick       = 'on';
-            
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            ht = title(sprintf('%s', datestr(thisdateT, datestrfmt)));
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHTITLE', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            hl = legend(hanni, prettylabelSVOt, prettylabelSVO, prettylabelSVobar, ...
-                'location', 'best');
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHTITLELEGEND', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            delete(ht)
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHLEGEND', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            delete(hl);
-            ht = title(sprintf('%s', datestr(thisdateT, datestrfmt)));
-            hd = plot(theseFcstdates, theseRealized(2:end), 'd', 'color', darkgreen, 'linewidth', 2);
-            plot(theseFcstdatesCumJumpoff, theseRealized, ':', 'color', darkgreen, 'linewidth', 2);
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHTITLEDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            delete(ht);
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            hl = legend([hanni; hd], prettylabelSVOt, prettylabelSVO, prettylabelSVobar, 'realized', ...
-                'location', 'best');
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHLEGENDDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            ht = title(sprintf('%s', datestr(thisdateT, datestrfmt)));
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHTITLELEGENDDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], false)
+%% FIG4 plot SVOt vs SVoutmiss
+if doFig4
 
-            tabulatePanel(wrap, thisPlotLabel, n, ndxT, thisdateT, theseFcstdates, ...
-                prettylabelSVOt, prettylabelSVO, prettylabelSVobar, ...
-                fcstMidSVOt, fcstMidSVO, fcstMidSVobar, ...
-                fcstTailsSVOt, fcstTailsSVO, fcstTailsSVobar, ...
-                ncode, ndxCI, setQuantiles)
-        end
+    if doFullYlist
+        ylist = 1:N;
+    else
+        ylist    = [1 5 6];
     end
-end
 
-%% plot SVOt vs SVdummy vs SVoutmiss
-if doSVdummy
-    ndxRange = find(ydates(Tjumpoffs) >= datenum(2020,3,1));
-    ndxRange = ndxRange(:)';
-    
-    
-    if doShowOnlyLatest
-        ndxRange = ndxRange(end);
-    end
-    
-    close all
-    thisPlotLabel = 'predictiveDensityOutmissDummy';
-    for n = ylist
-        
-        for ndxT = ndxRange
-            
-            jumpoff   = Tjumpoffs(ndxT);
-            thisdateT = ydates(jumpoff);
-            
-            %% identify outlier data per sample end
-            dataO           = data(1:jumpoff,:);
-            dev             = abs(dataO - median(dataO));
-            iqr             = range(prctile(dataO, [25 75]));
-            dataOnan        = dev > Ofactor * iqr;
-            outlier         = dataO;
-            outlier(~dataOnan) = NaN;
-            dataO(dataOnan) = NaN;
-            
-            
-            
-            %% compare predictive densities (jumpoff)
-            jj                = find(fcstdates == ydates(jumpoff));
-            allthesedates     = fcstdates(jj-np:jj+fcstNhorizons);
-            theseFcstdates    = fcstdates(jj+(1:fcstNhorizons));
-            theseJumpoffdates = fcstdates(jj+(-np:0));
-            if ~isequal(theseJumpoffdates, ydates(jj+(-np:0)))
-                error houston
-            end
-            
-            theseRealized = NaN(fcstNhorizons+1, 1);
-            ndx = jj+(0:fcstNhorizons);
-            ndx = ndx(ndx <= Tdata);
-            theseRealized(1 : length(ndx)) = data(ndx,n);
-            theseFcstdatesCumJumpoff = [theseJumpoffdates(end); theseFcstdates];
-            
-            
-            hanni = NaN(3,1);
-            
-            
-            %% plot
-            thisfig   = figure;
-            set(thisfig,'defaultLegendAutoUpdate','off');
-            ax = gca;
-            set(ax, 'fontsize', fontsize)
-            hold on
-            hanni(1)   = plotCI(fcstMidSVoutMiss(n,:,ndxT), squeeze(fcstTailsSVoutMiss(n,:,:,ndxT)), ...
-                theseFcstdates, [], 'k--', 'linewidth', 3);
-            
-            hanni(2)   = plot(theseFcstdates,fcstMidSVOt(n,:,ndxT), 'b-.', 'linewidth', 3);
-            plot(theseFcstdates,squeeze(fcstTailsSVOt(n,:,:,ndxT)), 'b-.', 'linewidth', 2);
-            
-            hanni(3)   = plot(theseFcstdates,fcstMidSVdummy(n,:,ndxT), 'm-', 'linewidth', 3); % 'color', [0 .5 0],
-            plot(theseFcstdates,squeeze(fcstTailsSVdummy(n,:,:,ndxT)), 'm-', 'linewidth', 1);
-            
-            
-            % plot(theseJumpoffdates, outliermissYmid(jj+(-np:0),n, ndxT), ':', 'color', [0 0 0], ...
-            %     'markersize', 8, 'linewidth', 2);
-            % plot(theseJumpoffdates, squeeze(outliermissYtails(jj+(-np:0),n, :, ndxT)), ':', 'color', [0 0 0], ...
-            %     'markersize', 8, 'linewidth', 2);
-            plotCI(outliermissYmid(jj+(-np:0),n, ndxT), squeeze(outliermissYtails(jj+(-np:0),n, :, ndxT)), ...
-                theseJumpoffdates, [], 'k:', 'linewidth', 2);
-            
-            plot(theseJumpoffdates, data(jj+(-np:0),n), '-', 'color', darkgreen, 'linewidth', 2);
-            plot(theseJumpoffdates, outlier(jj+(-np:0),n), 'o', 'color', [0 0 0], ...
-                'markersize', 8, 'linewidth', 2);
-            if doConnectDots
-                plot([theseJumpoffdates(end) theseFcstdates(1)], [data(jj,n) fcstMidSVoutMiss(n,1,ndxT)], ':', 'color', black, 'linewidth', 2);
-            end
-            
-            if min(ylim) < 0 && max(ylim) > 0, plotOrigin, end
-            
-            xlim(allthesedates([1 end]))
-            xticks(tickdates)
-            datetick('x', 'yyyy', 'keeplimits')
-            ax.XAxis.MinorTick       = 'on';
-            
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            ht = title(sprintf('%s', datestr(thisdateT, datestrfmt)));
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHTITLE', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            hl = legend(hanni, prettylabelSVoutMiss, prettylabelSVOt, prettylabelSVdummy,  ...
-                'location', 'best');
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHTITLELEGEND', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            delete(ht)
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHLEGEND', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            delete(hl);
-            ht = title(sprintf('%s', datestr(thisdateT, datestrfmt)));
-            hd = plot(theseFcstdates, theseRealized(2:end), 'd', 'color', darkgreen, 'linewidth', 2);
-            plot(theseFcstdatesCumJumpoff, theseRealized, ':', 'color', darkgreen, 'linewidth', 2);
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHTITLEDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            delete(ht);
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            hl = legend([hanni; hd], prettylabelSVoutMiss, prettylabelSVOt, prettylabelSVdummy, 'realized',  ...
-                'location', 'best');
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHLEGENDDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
+    ndxRange = find(any(ydates(Tjumpoffs) == [datenum(2020,[9 12],1), datenum(2021, 3,1)],2));
+    ndxRange = ndxRange(:)'; % ensure it is a row vector
 
-            ht = title(sprintf('%s', datestr(thisdateT, datestrfmt)));
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHTITLELEGENDDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], false)
-
-            tabulatePanel(wrap, thisPlotLabel, n, ndxT, thisdateT, theseFcstdates, ...
-                prettylabelSVoutMiss, prettylabelSVOt, prettylabelSVdummy, ...
-                fcstMidSVoutMiss, fcstMidSVOt, fcstMidSVdummy, ...
-                fcstTailsSVoutMiss, fcstTailsSVOt, fcstTailsSVdummy, ...
-                ncode, ndxCI, setQuantiles)
-        end
-    end
-end
-
-%% plot SVOt vs SVoutmiss
-if doRow3
-    ndxRange = find(ydates(Tjumpoffs) >= datenum(2020,3,1));
-    ndxRange = ndxRange(:)';
-    
-    
-    if doShowOnlyLatest
-        ndxRange = ndxRange(end);
-    end
-    
     close all
     thisPlotLabel = 'predictiveDensitySVOtOutmiss';
     for n = ylist
-        
+
         for ndxT = ndxRange
-            
+
             jumpoff   = Tjumpoffs(ndxT);
             thisdateT = ydates(jumpoff);
-            
+
             %% identify outlier data per sample end
             dataO           = data(1:jumpoff,:);
             dev             = abs(dataO - median(dataO));
@@ -831,9 +424,9 @@ if doRow3
             outlier         = dataO;
             outlier(~dataOnan) = NaN;
             dataO(dataOnan) = NaN;
-            
-            
-            
+
+
+
             %% compare predictive densities (jumpoff)
             jj                = find(fcstdates == ydates(jumpoff));
             allthesedates     = fcstdates(jj-np:jj+fcstNhorizons);
@@ -842,18 +435,18 @@ if doRow3
             if ~isequal(theseJumpoffdates, ydates(jj+(-np:0)))
                 error houston
             end
-            
+
             theseRealized = NaN(fcstNhorizons+1, 1);
             ndx = jj+(0:fcstNhorizons);
             ndx = ndx(ndx <= Tdata);
             theseRealized(1 : length(ndx)) = data(ndx,n);
             theseFcstdatesCumJumpoff = [theseJumpoffdates(end); theseFcstdates];
-            
-            
-            
+
+
+
             %% plot
             hanni = NaN(2,1);
-            
+
             thisfig   = figure;
             set(thisfig,'defaultLegendAutoUpdate','off');
             ax = gca;
@@ -861,68 +454,66 @@ if doRow3
             hold on
             hanni(1)   = plotCI(fcstMidSVoutMiss(n,:,ndxT), squeeze(fcstTailsSVoutMiss(n,:,:,ndxT)), ...
                 theseFcstdates, [], 'k--', 'linewidth', 3);
-            
-            hanni(2)   = plot(theseFcstdates,fcstMidSVOt(n,:,ndxT), 'b-.', 'linewidth', 3);
-            plot(theseFcstdates,squeeze(fcstTailsSVOt(n,:,:,ndxT)), 'b-.', 'linewidth', 2);
-            
-            %             hanni(3)   = plot(theseFcstdates,fcstMidSVdummy(n,:,ndxT), 'm-', 'linewidth', 3); % 'color', [0 .5 0],
-            %             plot(theseFcstdates,squeeze(fcstTailsSVdummy(n,:,:,ndxT)), 'm-', 'linewidth', 1);
-            
-            
-            % plot(theseJumpoffdates, outliermissYmid(jj+(-np:0),n, ndxT), ':', 'color', [0 0 0], ...
-            %     'markersize', 8, 'linewidth', 2);
-            % plot(theseJumpoffdates, squeeze(outliermissYtails(jj+(-np:0),n, :, ndxT)), ':', 'color', [0 0 0], ...
-            %     'markersize', 8, 'linewidth', 2);
-            plotCI(outliermissYmid(jj+(-np:0),n, ndxT), squeeze(outliermissYtails(jj+(-np:0),n, :, ndxT)), ...
-                theseJumpoffdates, [], 'k:', 'linewidth', 2);
-            
-            plot(theseJumpoffdates, data(jj+(-np:0),n), '-', 'color', darkgreen, 'linewidth', 2);
-            plot(theseJumpoffdates, outlier(jj+(-np:0),n), 'o', 'color', [0 0 0], ...
+
+            hanni(2)   = plot(theseFcstdates,fcstMidSVOt(n,:,ndxT), 'b-', 'linewidth', 1);
+            plot(theseFcstdates,squeeze(fcstTailsSVOt(n,:,:,ndxT)), 'b-', 'linewidth', 1/2);
+
+            %             plotCI(outliermissYmid(jj+(-np:0),n, ndxT), squeeze(outliermissYtails(jj+(-np:0),n, :, ndxT)), ...
+            %                 theseJumpoffdates, [], 'k:', 'linewidth', 3);
+            xndx         = jj+(-np:0);
+            outmissNdx   = dataOnan(xndx,n);
+            if any(outmissNdx)
+                outmissStart = find(outmissNdx,1,'first');
+                outmissStop  = find(outmissNdx,1,'last');
+                outmissStart = max(1, outmissStart-1);
+                outmissStop  = min(np+1, outmissStop+1);
+                xndx = xndx(outmissStart:outmissStop);
+                plotCI(outliermissYmid(xndx,n, ndxT), squeeze(outliermissYtails(xndx,n, :, ndxT)), ...
+                    theseJumpoffdates(outmissStart:outmissStop), [], 'k--', 'linewidth', 3);
+            end
+
+            hlagged = plot(theseJumpoffdates, data(jj+(-np:0),n), ':', 'color', darkgreen, 'linewidth', 3);
+            hmiss = plot(theseJumpoffdates, outlier(jj+(-np:0),n), 'o', 'color', [0 0 0], ...
                 'markersize', 8, 'linewidth', 2);
             if doConnectDots
                 plot([theseJumpoffdates(end) theseFcstdates(1)], [data(jj,n) fcstMidSVoutMiss(n,1,ndxT)], ':', 'color', black, 'linewidth', 2);
             end
-            
+
             if min(ylim) < 0 && max(ylim) > 0, plotOrigin, end
-            
+
             xlim(allthesedates([1 end]))
             xticks(tickdates)
             datetick('x', 'yyyy', 'keeplimits')
             ax.XAxis.MinorTick       = 'on';
-            
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            ht = title(sprintf('%s', datestr(thisdateT, datestrfmt)));
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHTITLE', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            hl = legend(hanni, prettylabelSVoutMiss, prettylabelSVOt,  ...
-                'location', 'best');
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHTITLELEGEND', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            delete(ht)
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHLEGEND', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            delete(hl);
-            ht = title(sprintf('%s', datestr(thisdateT, datestrfmt)));
-            hd = plot(theseFcstdates, theseRealized(2:end), 'd', 'color', darkgreen, 'linewidth', 2);
-            plot(theseFcstdatesCumJumpoff, theseRealized, ':', 'color', darkgreen, 'linewidth', 2);
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHTITLEDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            delete(ht);
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
-            
-            hl = legend([hanni; hd], prettylabelSVoutMiss, prettylabelSVOt, 'realized',  ...
-                'location', 'best');
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHLEGENDDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
 
-            ht = title(sprintf('%s', datestr(thisdateT, datestrfmt)));
-            wrapthisfigure(thisfig, sprintf('%s-%s-%s-WITHTITLELEGENDDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], false)
+            %             wrapthisfigureBW(thisfig, sprintf('%s-%s-%s', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
+            %
+            %             %             ht = title(sprintf('%s', datestr(thisdateT, datestrfmt)));
+            %             %             wrapthisfigureBW(thisfig, sprintf('%s-%s-%s-WITHTITLE', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
+            %
+            %             hl = legend(hanni, prettylabelSVoutMiss, prettylabelSVOt,  ...
+            %                 'location', 'best');
+            %             %             wrapthisfigureBW(thisfig, sprintf('%s-%s-%s-WITHTITLELEGEND', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
+            %             %
+            %             %             delete(ht)
+            %             wrapthisfigureBW(thisfig, sprintf('%s-%s-%s-WITHLEGEND', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
+            %
+            %             delete(hl);
+            %             ht = title(sprintf('%s', datestr(thisdateT, datestrfmt)));
+            hd = plot(theseFcstdates, theseRealized(2:end), '*', 'color', darkgreen, 'linewidth', 2, 'markersize', 10);
+            %             wrapthisfigureBW(thisfig, sprintf('%s-%s-%s-WITHTITLEDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
 
-            %             tabulatePanel(wrap, thisPlotLabel, n, ndxT, thisdateT, theseFcstdates, ...
-            %                 prettylabelSVoutMiss, prettylabelSVOt, prettylabelSVdummy, ...
-            %                 fcstMidSVoutMiss, fcstMidSVOt, fcstMidSVdummy, ...
-            %                 fcstTailsSVoutMiss, fcstTailsSVOt, fcstTailsSVdummy, ...
-            %                 ncode, ndxCI, setQuantiles)
+            %             delete(ht);
+            wrapthisfigureBW(thisfig, sprintf('%s-%s-%s-WITHDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
+
+            hl = legend([hanni; hlagged; hmiss; hd], prettylabelSVoutMiss, prettylabelSVOt, ...
+                'past data', 'omitted in OutMiss', 'forecast realizations', ...
+                'location', 'best');
+            wrapthisfigureBW(thisfig, sprintf('%s-%s-%s-WITHLEGENDDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], true)
+
+            %             ht = title(sprintf('%s', datestr(thisdateT, datestrfmt)));
+            %             wrapthisfigureBW(thisfig, sprintf('%s-%s-%s-WITHTITLELEGENDDATA', thisPlotLabel, ncode{n}, datestr(thisdateT, 28)), wrap, [], [], [], [], false)
+
         end
     end
 end
@@ -935,117 +526,3 @@ dockAllFigures
 finishwrap
 finishscript
 
-function tabulatePanel(wrap, thisPlotLabel, n, ndxT, thisdateT, theseFcstdates, prettylabel1, prettylabel2, prettylabel3, fcstMid1, fcstMid2, fcstMid3, fcstTails1, fcstTails2, fcstTails3, ncode, ndxCI, setQuantiles)
-
-if isempty(wrap)
-    return
-end
-
-tabname = sprintf('%s-%s-%s', thisPlotLabel, ncode{n}, datestr(thisdateT, 28));
-
-datalabels = {sprintf('%s median', prettylabel1), ...
-    sprintf('%s %4.2f%% quantile', prettylabel1, setQuantiles(1,ndxCI(1))), ...
-    sprintf('%s %4.2f%% quantile', prettylabel1, setQuantiles(1,ndxCI(2))), ...
-    sprintf('%s median', prettylabel2), ...
-    sprintf('%s %4.2f%% quantile', prettylabel2, setQuantiles(1,ndxCI(1))), ...
-    sprintf('%s %4.2f%% quantile', prettylabel2, setQuantiles(1,ndxCI(2))), ...
-    sprintf('%s median', prettylabel3), ...
-    sprintf('%s %4.2f%% quantile', prettylabel3, setQuantiles(1,ndxCI(1))), ...
-    sprintf('%s %4.2f%% quantile', prettylabel3, setQuantiles(1,ndxCI(2)))}; %#ok<NASGU>
-
-data4table = [transpose(fcstMid1(n,:,ndxT)), squeeze(fcstTails1(n,:,:,ndxT)), ...
-    transpose(fcstMid2(n,:,ndxT)), squeeze(fcstTails2(n,:,:,ndxT)), ...
-    transpose(fcstMid3(n,:,ndxT)), squeeze(fcstTails3(n,:,:,ndxT))];
-
-
-% write into csv
-% writedatatable(wrap, tabname, theseFcstdates, data4table, datalabels, 'yyyy:mm');
-
-% tabulate in tex
-tabdir = wrap.dir;
-fid = fopen(fullfile(tabdir, strcat(tabname, '.tex')), 'wt');
-fprintf(fid, '\\begin{small}\n');
-fprintf(fid, '\\begin{center}\n');
-fprintf(fid, '\\begin{tabular}{l%s}\n', repmat('.4', 1, size(data4table,2)));
-fprintf(fid, '\\toprule\n');
-fprintf(fid, ' & \\multicolumn{3}{c}{%s}', prettylabel1);
-fprintf(fid, ' & \\multicolumn{3}{c}{%s}', prettylabel2);
-fprintf(fid, ' & \\multicolumn{3}{c}{%s}', prettylabel3);
-fprintf(fid, '\\\\ \\cmidrule(lr){2-4}\\cmidrule(lr){5-7}\\cmidrule(lr){8-10} \n');
-fprintf(fid, 'Dates ');
-fprintf(fid, ' & 50.00\\%% &  %4.2f\\%% &  %4.2f\\%%', setQuantiles(1,ndxCI(1)), setQuantiles(1,ndxCI(2)));
-fprintf(fid, ' & 50.00\\%% &  %4.2f\\%% &  %4.2f\\%%', setQuantiles(1,ndxCI(1)), setQuantiles(1,ndxCI(2)));
-fprintf(fid, ' & 50.00\\%% &  %4.2f\\%% &  %4.2f\\%%', setQuantiles(1,ndxCI(1)), setQuantiles(1,ndxCI(2)));
-fprintf(fid, '\\\\\n');
-fprintf(fid, '\\midrule\n');
-
-for t = 1 : size(data4table,1)
-    fprintf(fid, '%s ', datestr(theseFcstdates(t), 'yyyy:mm'));
-    fprintf(fid, '& %6.2f ', data4table(t,:));
-    fprintf(fid, '\\\\\n');
-end
-
-fprintf(fid, '\\bottomrule\n');
-fprintf(fid, '\\end{tabular}\n');
-fprintf(fid, '\\end{center}\n');
-fprintf(fid, '\n');
-fprintf(fid, '\\end{small}\n');
-fclose(fid);
-type(fullfile(tabdir, strcat(tabname, '.tex')))
-latexwrapper(wrap, 'add', 'sidetab', strcat(tabname, '.tex'), [])
-end
-
-function tabulatePanel2(wrap, thisPlotLabel, n, ndxT, thisdateT, theseFcstdates, prettylabel1, prettylabel2, fcstMid1, fcstMid2, fcstTails1, fcstTails2, ncode, ndxCI, setQuantiles)  %#ok<DEFNU>
-
-if isempty(wrap)
-    return
-end
-
-tabname = sprintf('%s-%s-%s', thisPlotLabel, ncode{n}, datestr(thisdateT, 28));
-
-datalabels = {sprintf('%s median', prettylabel1), ...
-    sprintf('%s %4.2f%% quantile', prettylabel1, setQuantiles(1,ndxCI(1))), ...
-    sprintf('%s %4.2f%% quantile', prettylabel1, setQuantiles(1,ndxCI(2))), ...
-    sprintf('%s median', prettylabel2), ...
-    sprintf('%s %4.2f%% quantile', prettylabel2, setQuantiles(1,ndxCI(1))), ...
-    sprintf('%s %4.2f%% quantile', prettylabel2, setQuantiles(1,ndxCI(2))), ...
-    }; %#ok<NASGU>
-
-data4table = [transpose(fcstMid1(n,:,ndxT)), squeeze(fcstTails1(n,:,:,ndxT)), ...
-    transpose(fcstMid2(n,:,ndxT)), squeeze(fcstTails2(n,:,:,ndxT)), ...
-    ];
-
-% write into csv
-% writedatatable(wrap, tabname, theseFcstdates, data4table, datalabels, 'yyyy:mm');
-
-% tabulate in tex
-tabdir = wrap.dir;
-fid = fopen(fullfile(tabdir, strcat(tabname, '.tex')), 'wt');
-fprintf(fid, '\\begin{small}\n');
-fprintf(fid, '\\begin{center}\n');
-fprintf(fid, '\\begin{tabular}{l%s}\n', repmat('.4', 1, size(data4table,2)));
-fprintf(fid, '\\toprule\n');
-fprintf(fid, ' & \\multicolumn{3}{c}{%s}', prettylabel1);
-fprintf(fid, ' & \\multicolumn{3}{c}{%s}', prettylabel2);
-fprintf(fid, '\\\\ \\cmidrule(lr){2-4}\\cmidrule(lr){5-7}\n');
-fprintf(fid, 'Dates ');
-fprintf(fid, ' & 50.00\\%% &  %4.2f\\%% &  %4.2f\\%%', setQuantiles(1,ndxCI(1)), setQuantiles(1,ndxCI(2)));
-fprintf(fid, ' & 50.00\\%% &  %4.2f\\%% &  %4.2f\\%%', setQuantiles(1,ndxCI(1)), setQuantiles(1,ndxCI(2)));
-fprintf(fid, '\\\\\n');
-fprintf(fid, '\\midrule\n');
-
-for t = 1 : size(data4table,1)
-    fprintf(fid, '%s ', datestr(theseFcstdates(t), 'yyyy:mm'));
-    fprintf(fid, '& %6.2f ', data4table(t,:));
-    fprintf(fid, '\\\\\n');
-end
-
-fprintf(fid, '\\bottomrule\n');
-fprintf(fid, '\\end{tabular}\n');
-fprintf(fid, '\\end{center}\n');
-fprintf(fid, '\n');
-fprintf(fid, '\\end{small}\n');
-fclose(fid);
-type(fullfile(tabdir, strcat(tabname, '.tex')))
-latexwrapper(wrap, 'add', 'sidetab', strcat(tabname, '.tex'), [])
-end

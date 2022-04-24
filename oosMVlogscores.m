@@ -19,7 +19,7 @@ addpath matlabtoolbox/emstatespace/
 
 %% setup
 
-resultsdir     = '~/jam/lager/var2021-matfiles/logscoresSVAR1';
+resultsdir     = '~/jam/lager/var2021-matfiles/logscoresLevels';
 
 wrap = [];
 initwrap
@@ -28,42 +28,49 @@ initwrap
 
 % note: for SVO/SVOt set useRB to true to use the RB scores (for other models, the standard scores use RB anyway)
 
-% SV
+% CONST
 m = 1; % m + 1;
 models(m).datalabel    = 'fredMD16-2021-04';
-models(m).resultlabel  = 'censoredYields-SVar1-p12';
-models(m).prettylabel  = 'SV-AR(1)';
+models(m).resultlabel  = 'censoredYields-CONST-p12';
+models(m).prettylabel  = 'CONST';
+models(m).useRB        = false;
+
+% SV
+m = m + 1;
+models(m).datalabel    = 'fredMD16-2021-04';
+models(m).resultlabel  = 'censoredYields-SV-p12';
+models(m).prettylabel  = 'SV';
 models(m).useRB        = false;
 
 % SVO
 m = m + 1;
 models(m).datalabel    = 'fredMD16-2021-04';
-models(m).resultlabel  = 'censoredYields-SVOar1max20-p12';
-models(m).prettylabel  = 'SVO-AR(1)';
+models(m).resultlabel  = 'censoredYields-SVOmax20-p12';
+models(m).prettylabel  = 'SVO';
 models(m).useRB        = true;
 
 % SV-t
 m = m + 1;
 models(m).datalabel    = 'fredMD16-2021-04';
-models(m).resultlabel  = 'censoredYields-SVtar1-p12';
-models(m).prettylabel  = 'SV-t-AR(1)';
+models(m).resultlabel  = 'censoredYields-SVt-p12';
+models(m).prettylabel  = 'SV-t';
 models(m).useRB        = false;
 
 % SVO-t
 m = m + 1;
 models(m).datalabel    = 'fredMD16-2021-04';
-models(m).resultlabel  = 'censoredYields-SVOtar1max20-p12';
-models(m).prettylabel  = 'SVO-t-AR(1)';
+models(m).resultlabel  = 'censoredYields-SVOtmax20-p12';
+models(m).prettylabel  = 'SVO-t';
 models(m).useRB        = true;
 
 % SV-OutMiss
-m = m + 1;
-models(m).datalabel    = 'fredMD16-2021-04';
-models(m).resultlabel  = 'censoredYields-SVar1nanO5-p12';
-models(m).prettylabel  = 'SV-AR(1)-OutMiss';
-models(m).useRB        = false;
+% m = m + 1;
+% models(m).datalabel    = 'fredMD16-2021-04';
+% models(m).resultlabel  = 'censoredYields-SVnanO5-p12';
+% models(m).prettylabel  = 'OutMiss';
+% models(m).useRB        = false;
 
-models   = models([4 2 3 5 1]); % order benchmark last
+models   = models([5 3 4 1 2]); % order benchmark last
 
 %% load models
 oos = cell(0);
@@ -191,8 +198,10 @@ sam(s).evalStart = datenum(2020,7,1);
 sam(s).label     = '2020:07-2021:02';
 sam(s).prettylabel  = 'COVID-19 since Jul 2020';
 
+
 %% prepare results table across  samples
 scoresTABLE       = NaN(length(models) - 1, length(sam));
+avgscoresTABLE    = NaN(length(models) - 1, length(sam));
 scoresdmstatTABLE = NaN(length(models) - 1, length(sam));
 
 %% loop over samples
@@ -238,6 +247,7 @@ for s = 1 : length(sam)
     sumscores   = sum(scores);
     dscores     = scores(:,1:end-1) - scores(:,end);
     sumdscores  = sum(dscores);
+    avgdscores  = mean(dscores);
     
     %% compute dm
     dmTstats = zeros(length(models)-1, 1);
@@ -248,16 +258,21 @@ for s = 1 : length(sam)
         [~,dmTstats(m)] = dmtest(scores(:,end), scores(:,m), nwLag);
     end
     
-    
+   
     
     %% collect  scores into table
     scoresTABLE(:,s)       = sumdscores;
+    avgscoresTABLE(:,s)    = avgdscores;
     scoresdmstatTABLE(:,s) = dmTstats;
     
+    
     %% plot differences in scores
+    
+    NSVOmodels = 3;
+
     if s == 1
         cumDscores = cumsum(dscores);
-        theselabel = {models(1:end-1).prettylabel};
+        theselabel = {models(1:NSVOmodels).prettylabel};
         
         if range(year(dates)) > 40
             tickyears = datenum(1980:10:2020,1,1);
@@ -272,7 +287,7 @@ for s = 1 : length(sam)
         thisfig = figure;
         hold on
         set(gca, 'fontsize', 18)
-        hh = plot(dates, cumDscores, 'linewidth', 2);
+        hh = plot(dates, cumDscores(:,1:NSVOmodels), 'linewidth', 2);
         nbershades(dates)
         xlim(dates([1 end]))
         if ~isempty(tickyears)
@@ -281,12 +296,12 @@ for s = 1 : length(sam)
         datetick('x', 'keepticks', 'keeplimits')
         plotOrigin('k:', [], [], 2)
         legend(hh, theselabel, 'location', 'best', 'box', 'on')
-        wrapthisfigure(thisfig, sprintf('cumlogscores-%s', samLabel), wrap, [], [], [], [], true)
+        wrapthisfigureBW(thisfig, sprintf('cumlogscoresSVO-%s', samLabel), wrap, [], [], [], [], true)
         title(sprintf('cumulative scores relative to %s', models(end).prettylabel))
-        wrapthisfigure(thisfig, sprintf('cumlogscores-%s-WITHTITLE', samLabel), wrap)
+        wrapthisfigureBW(thisfig, sprintf('cumlogscoresSVO-%s-WITHTITLE', samLabel), wrap)
         
     end
-    
+        
     
     %% finish sam
     dockAllFigures
@@ -294,7 +309,7 @@ end % sam
 
 
 %% tabulate scores (PAPER VERSION)
-tabname    = 'MVlogscoresTableSV-AR1.tex';
+tabname    = 'MVlogscoresTable.tex';
 tabcaption = sprintf('Cumulative differences in predictive log-scores (vs. %s)', models(end).prettylabel);
 
 if isempty(wrap)
@@ -307,7 +322,6 @@ end
 % write table
 fid = fopen(fullfile(tabdir, tabname), 'wt');
 fprintf(fid, '\\begin{center}\n');
-% fprintf(fid, '\\small\n');
 fprintf(fid, '\\begin{tabular}{l%s}\n', repmat('.3', 1, length(models)-1));
 fprintf(fid, '\\toprule\n');
 fprintf(fid, '& \\multicolumn{%d}{c}{\\bf Models} ', length(models) - 1);
@@ -329,8 +343,14 @@ for s = 1 : length(sam)
     fprintf(fid, '{\\bf %s} ', sam(s).prettylabel);
     fprintf(fid, '\\\\\n');
     fprintf(fid, '{\\quad %s} ', samLabel);
+    % print scores
     for m = 1 : length(models) - 1
         fprintf(fid, '& %6.2f ', scoresTABLE(m,s));
+    end
+    fprintf(fid, '\\\\\n');
+    % print avg scores underneath
+    for m = 1 : length(models) - 1
+        fprintf(fid, '& (%6.2f) ', avgscoresTABLE(m,s));
     end
     fprintf(fid, '\\\\\n');
 end

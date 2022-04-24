@@ -51,7 +51,6 @@ datelim   = [datenum(1960,1,1) ydates(end)];
 %% plot SV w/ and w/o outliers for each model
 for ndxT = find(ydates(Tjumpoffs) == datenum(2021,3,1)) 
     
-    % [find(ydates(Tjumpoffs) == datenum(2021,3,1)), find(ydates(Tjumpoffs) == datenum(2020,1,1))]
     
     thisT     = Tjumpoffs(ndxT);
     
