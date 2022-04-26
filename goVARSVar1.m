@@ -1,28 +1,5 @@
-%% ************************************************************************************
-% Triangular algorithm, Carriero Clark and Marcellino (2015), Large Vector Autoregressions
-% with stochastic volatility and flexible priors. The code takes approx. 5
-% mins on an average desktop.
-% ************************************************************************************
-% Model is:
-%
-%     Y(t) = Pi(L)Y(t-1) + v(t); Y(t) is Nx1;
-%     v(t) = inv(A)*(LAMBDA(t)^0.5)*e(t); e(t) ~ N(0,I);
-%                   _                                         _
-%                  |    1          0       0       ...      0  |
-%                  |  A(2,1)       1       0       ...      0  |
-%         A =      |  A(3,1)     A(3,2)    1       ...      0  |
-%                  |   ...        ...     ...      ...     ... |
-%                  |_ A(N,1)      ...     ...   A(N,N-1)    1 _|
-%
-%    Lambda(t)^0.5 = diag[sqrt_h(1,t)  , .... , sqrt_h(N,t)];
-%
-%    ht=exp(Vol_states)
-%    sqrtht=sqrt(ht)=sqrt(exp(Vol_states))=exp(Vol_states/2)
-%    Vol_states=2*ln(sqrtht)
-%
-%    Vol_states(i,t)   = Vol_states(i,t-1) + eta(i,t),
-%    eta(t) ~ N(0,PHI); with PHI full
-% ------------------------------------------------------------------------------------
+%% Estimates quasi-real-time runs of VAR-SV-AR(1) model
+% Carriero, Clark, Marcellino and Mertens (forthcoming, REStat)
 
 %#ok<*NOSEL>
 %#ok<*DISPLAYPROG>
