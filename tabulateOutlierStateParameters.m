@@ -12,20 +12,20 @@ addpath matlabtoolbox/emstatespace/
 %% Initial operations
 clear; close all; clc;
 
-datadir = '~/jam/lager/var2021-matfiles/';
+resultsdir = pwd;
 
 jumpoffDate = datenum(2021,3,1);
 
 jumpoff     = datestr(jumpoffDate, 'yyyymm');
 
 this = 'SVO';
-matSVO        = matfile(fullfile(datadir, ...
+matSVO        = matfile(fullfile(resultsdir, ...
     sprintf('fredMD16-2021-04-%s-p12-%s-alldraws.mat', jumpoff, this)));
 this = 'SVt';
-matSVt = matfile(fullfile(datadir, ...
+matSVt = matfile(fullfile(resultsdir, ...
     sprintf('fredMD16-2021-04-%s-p12-%s-alldraws.mat', jumpoff, this)));
 this = 'SVOt';
-matSVOt = matfile(fullfile(datadir, ...
+matSVOt = matfile(fullfile(resultsdir, ...
     sprintf('fredMD16-2021-04-%s-p12-%s-alldraws.mat', jumpoff, this)));
 
 wrap = [];

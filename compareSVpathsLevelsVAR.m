@@ -12,12 +12,12 @@ addpath matlabtoolbox/emstatespace/
 %% Initial operations
 clear; close all; clc;
 
-datadir = '~/jam/lager/var2021-matfiles/logscoresLevels';
+resultsdir = pwd;
 
-matSV         = matfile(fullfile(datadir, 'fredMD16levels-2021-04-censoredYields-SV-p12.mat'));
-matSVO        = matfile(fullfile(datadir, 'fredMD16levels-2021-04-censoredYields-SVOmax20-p12.mat'));
-matSVt        = matfile(fullfile(datadir, 'fredMD16levels-2021-04-censoredYields-SVt-p12.mat'));
-matSVOt       = matfile(fullfile(datadir, 'fredMD16levels-2021-04-censoredYields-SVOtmax20-p12.mat'));
+matSV         = matfile(fullfile(resultsdir, 'fredMD16levels-2021-04-censoredYields-SV-p12.mat'));
+matSVO        = matfile(fullfile(resultsdir, 'fredMD16levels-2021-04-censoredYields-SVOmax20-p12.mat'));
+matSVt        = matfile(fullfile(resultsdir, 'fredMD16levels-2021-04-censoredYields-SVt-p12.mat'));
+matSVOt       = matfile(fullfile(resultsdir, 'fredMD16levels-2021-04-censoredYields-SVOtmax20-p12.mat'));
 
 wrap = [];
 initwrap

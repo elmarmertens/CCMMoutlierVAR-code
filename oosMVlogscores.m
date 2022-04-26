@@ -18,7 +18,7 @@ addpath matlabtoolbox/emstatespace/
 
 %% setup
 
-resultsdir     = '~/jam/lager/var2021-matfiles/logscoresLevels';
+resultsdir     = pwd;
 
 wrap = [];
 initwrap

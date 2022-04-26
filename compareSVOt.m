@@ -12,15 +12,15 @@ addpath matlabtoolbox/emstatespace/
 %% Initial operations
 clear; close all; clc;
 
-datadir = '~/jam/lager/var2021-matfiles/baseline';
+resultsdir = pwd;
 
 
-matSV         = matfile(fullfile(datadir, 'fredMD16-2021-04-censoredYields-SV-p12.mat'));
-matSVO        = matfile(fullfile(datadir, 'fredMD16-2021-04-censoredYields-SVOmax20-p12.mat'));
-matSVoutmiss  = matfile(fullfile(datadir, 'fredMD16-2021-04-censoredYields-SVnanO5-p12.mat'));
+matSV         = matfile(fullfile(resultsdir, 'fredMD16-2021-04-censoredYields-SV-p12.mat'));
+matSVO        = matfile(fullfile(resultsdir, 'fredMD16-2021-04-censoredYields-SVOmax20-p12.mat'));
+matSVoutmiss  = matfile(fullfile(resultsdir, 'fredMD16-2021-04-censoredYields-SVnanO5-p12.mat'));
 figlabel      = 'SVOt2021';
-matSVt        = matfile(fullfile(datadir, 'fredMD16-2021-04-censoredYields-SVt-p12.mat'));
-matSVOt       = matfile(fullfile(datadir, 'fredMD16-2021-04-censoredYields-SVOtmax20-p12.mat'));
+matSVt        = matfile(fullfile(resultsdir, 'fredMD16-2021-04-censoredYields-SVt-p12.mat'));
+matSVOt       = matfile(fullfile(resultsdir, 'fredMD16-2021-04-censoredYields-SVOtmax20-p12.mat'));
 
 wrap = [];
 initwrap

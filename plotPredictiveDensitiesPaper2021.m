@@ -16,7 +16,7 @@ addpath matlabtoolbox/emeconometrics/
 addpath matlabtoolbox/emstatespace/
 
 %% setup
-resultsdir = '~/jam/lager/var2021-matfiles/baseline';
+resultsdir = pwd;
 
 startSam   = [];
 datalabel  = 'fredMD16-2021-04';

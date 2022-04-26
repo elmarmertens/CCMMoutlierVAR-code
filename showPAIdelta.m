@@ -12,7 +12,7 @@ addpath matlabtoolbox/emstatespace/
 %% Initial operations
 clear; close all; clc;
 
-datadir = 'matPAI2020'; % '~/jam/lager/var2021-matfiles';
+resultsdir = 'matPAI2020'; % '~/jam/lager/var2021-matfiles';
 
 MODELTYPES = {'CONST-2020', 'SVOtmax20-2020',  ...
     'SVt-2020', 'SVOmax20-2020', 'SV-2020', 'SVnanO5-2020'};
@@ -31,7 +31,7 @@ for thism =  1 : length(MODELTYPES)
     
     modeltype = MODELTYPES{thism};
     
-    mat   = matfile(fullfile(datadir, sprintf('fredMD16-2021-04-censoredYields-%s-p12.mat', modeltype)));
+    mat   = matfile(fullfile(resultsdir, sprintf('fredMD16-2021-04-censoredYields-%s-p12.mat', modeltype)));
     
     wrap = [];
     titlename = sprintf('PAIsinceCOVID-%s', modeltype);
