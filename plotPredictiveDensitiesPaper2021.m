@@ -38,7 +38,7 @@ datestrfmt = 'mmmm yyyy';
 %% select plots
 
 doFullYlist = false;
-doFig3 = false;
+doFig3 = true;
 doFig4 = true;
 
 
