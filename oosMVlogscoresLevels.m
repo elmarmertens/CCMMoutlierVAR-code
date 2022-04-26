@@ -1,5 +1,4 @@
-%% compare OOS results from two estimates
-% load quantico*.mat files and assess OOS performance
+%% collect and tabulate predictive scores for various models (VARs in levels)
 
 clear
 close all

@@ -1,5 +1,4 @@
-%% compare OOS results from two estimates
-% load quantico*.mat files and assess OOS performance
+%% collect and tabulate predictive scores for various models with AR(1) in SV
 
 clear
 close all
