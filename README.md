@@ -1,12 +1,18 @@
-# Code for „Addressing COVID-19 Outliers in BVARs with Stochastic Volatility“ by Carriero, Clark, Marcellino and Mertens 
+# Replication Code: 
+# „Addressing COVID-19 Outliers in BVARs with Stochastic Volatility“ 
 
-Andrea Carriero (Queen Mary University of London), Todd Clark (Federal Reserve Bank of Cleveland), Massimiliano Marcellino (Bocconi University, IGIER and CEPR) and Elmar Mertens (Deutsche Bundesbank)
+by
+- Andrea Carriero (Queen Mary University of London, and University of Bologna)
+- Todd Clark (Federal Reserve Bank of Cleveland)
+- Massimiliano Marcellino (Bocconi University, Bocconi University, CEPR, IGIER, BIDSA, and BAFFI) 
+- Elmar Mertens (Deutsche Bundesbank)
 
 Accepted for publication in the *Review of Economics and Statistics*
 
 The usual disclaimers apply; the views and results conveyed in our research are solely those of the authors and do not necessarily reflect the views of the Federal Reserve Bank of Cleveland, the Federal Reserve System, the Eurosystem, or the Deutsche Bundesbank.
 
-Pre-publication versions of paper and supplementary material can be found here: https://www.elmarmertens.com/research/publications
+- Pre-publication versions of paper and supplementary material can be found here: https://www.elmarmertens.com/research/publications 
+- The replication code is also posted at https://github.com/elmarmertens/CCMMoutlierVAR-code
 
 ## Overview
 
@@ -19,7 +25,11 @@ The code requires a recent version of Matlab (we used Matlab versions 2019a-2021
 
 ## General notes 
 
-- All scripts set the MATLAB path to point to toolboxes in `matlabtoolbox`. In addition, most scripts collect output in a temporary directory, which is by default created as subfolder `foo` within the main directory. Edit `localtemp.m` to change the location of this temp directory. Output is collected in a LaTeX file, which is also compiled at the end of each script (provided a LaTeX installation can be found on the path). To control the compilation of output, please edit `finishwrap.m`. To avoid collecting output files, comment out the call to `initwrap` in each script (and make sure to define instead a variable called `wrap` that is set to empty).
+- All scripts set the MATLAB path to point to toolboxes in `matlabtoolbox`. 
+- In addition, most scripts collect output (in form of LaTeX tables and figures) in a temporary directory, which is by default created as subfolder `foo` within the main directory.  Figures and tables are also inserted in a LaTeX file, which is compiled at the end of each script (provided a LaTeX installation can be found on the path).
+-- Edit `localtemp.m` to change the location of the temp directory that contains the LaTeX output 
+-- To control whether to compile this output with LaTeX (or not), please edit `finishwrap.m`. 
+-- To avoid collecting output files, comment out the call to `initwrap` in each script (and make sure to define instead a variable called `wrap` that is set to empty).
 
 - Model names in paper and code:
 
@@ -33,23 +43,23 @@ The code requires a recent version of Matlab (we used Matlab versions 2019a-2021
 
 -- `VARSVt` is SV with $t$ errors, called SV-t
 -- `VARSVdummy` is the VAR with SV and separate dummies for each month of COVID
--- `VARSVobar` is the common-outlier variant of the SVO model.
+-- `VARSVobar` is the common-outlier variant of the SVO model
 -- `VARSV*ar1*` are model variants with AR(1) processes (instead of RW) for SV
 
 ## To prepare input data
 
 The folder `data` contains code to transform raw data, obtained 
-from FRED-MD, into data files for subsequent use by the analytical routines in the repository's root folder. 
+from FRED-MD, into data files for subsequent use by the analytical routines in the repository's main folder. 
 
 The raw data file that serves as input is `2021-04.csv`, which reflects the 2021-04 vintage of FRED-MD and is available under that name from https://research.stlouisfed.org/econ/mccracken/fred-databases/.  
 
-The script `generate_freddata.m` selects the appropriate contents of `2021-04.csv` and prepares an output files called `fredMD16-2021-04.csv` that contains the 16-variable data inputs  (after all necessary transformations) as described in Table 1 of the paper. The script also prepares LaTeX output to produce Table 1 of the paper.
+The script `generate_freddata.m` selects the appropriate contents of `2021-04.csv` and prepares an output file called `fredMD16-2021-04.csv` that contains the 16-variable data inputs  (after all necessary transformations) as described in Table 1 of the paper. The script also prepares LaTeX output to produce Table 1 of the paper.
 
 The supplementary appendix also contains an alternative specification of our VAR models using variables in levels rather than differences. To prepare data for this specification, use `generate_freddataLEVELS.m` which generates `fredMD16levels-2021-04.csv`.
 
-Copies of `fredMD16-2021-04.csv` and  `fredMD16levels-2021-04.csv` have been stored in the root folder of this repository for future use. (In case of data updates, these copies are not created automatically but must be made manually by the user.)
+Copies of `fredMD16-2021-04.csv` and  `fredMD16levels-2021-04.csv` have been stored in the main folder of this repository for further use as described below. (In case of data updates, these copies are not created automatically but must be made manually by the user.)
 
-Plots of the transformed input data, as shown in Section I of the supplementary appendix, are produced by calling `chartData16.m` contained in the root folder of this repository.
+Plots of the transformed input data, as shown in Section I of the supplementary appendix, are produced by calling `chartData16.m` contained in the main folder of this repository.
 
 ## To estimate models
 
@@ -57,17 +67,21 @@ Plots of the transformed input data, as shown in Section I of the supplementary 
 
 - To launch out-of-sample runs for a given model, consider scripts called `goXXX.m`, where `XXX` refers to one of the model labels listed above. After computing the out-of-sample runs each of these `goXXX.m` scripts stores results for further post-processing in a `AAA-BBB-p12.mat` file where `AAA` reflects the name of the input data file (default: `fredMD16-2021-4`) and `BBB` refers to the model name and additional estimation options. By default, these mat files are stored in the current folder, but the user can also chose to move these manually to a different location. Based on these mat files, figures and tables for the paper can be created as described further below. Each of these driver files calls MCMC sampling routines named `mcmcXXX.m` where `XXX` corresponds to the model labels listed above.
 
-- The main directory contains a bash script `gobatch.sh` that can be used to launch a sequence of multiple Matlab scripts from the shell. The Matlab scripts are executed in sequence *and in separate Matlab sessions*. Each Matlab session opens a parallel pool. For example, the shell command `sh gobatch.sh goVARSV.m goVARSVO.m` will launch a command line session of Matlab, start a parallel pool, and then execute `goVARSV.m`; once `goVARSV.m` has been executed, the Matlab sessions closes, a new one is reopened for execution of `goVARSVO.m`. (The shell script supports as many command line arguments as supported by bash and has been written for use on macOS and Linux.) Alternatively, Matlab scripts can, of course, equally be called interactively on the Matlab GUI’s command line.
+- To use data files other than `fredMD16-2021-04.csv` as input for estimation, edit the variables `datalabel` that is set in the preamble of each Matlab script to point to the name of the data file to be used.
+
+- The main directory contains a bash script `gobatch.sh` that can be used to launch a sequence of multiple Matlab scripts from the shell. The Matlab scripts are executed in sequence *and in separate Matlab sessions*. Each Matlab session opens a parallel pool. For example, the shell command `sh gobatch.sh goVARSV.m goVARSVO.m` will launch a command line session of Matlab, start a parallel pool, and then execute `goVARSV.m`; once `goVARSV.m` has been executed, the Matlab sessions closes, a new one is reopened for execution of `goVARSVO.m`. (The shell script supports as many command line arguments as supported by bash and has been written for use on macOS and Linux.) Alternatively, Matlab scripts can, of course, also be called interactively on the Matlab GUI’s command line.
 
 ## To produce figures and tables 
-To collect model outputs, there are various scripts called `plotPredicitiveDensity*`, and `oos*` (with the former generating plots while the latter create tables). The preamble to each of these scripts specifies a variable `resultsdir` that is expected to point to a directory of `mat` files as produced by the `goVARXXX.m` routines described above.
+To collect model outputs, there are various scripts described below. The preamble to each of these scripts specifies a variable `resultsdir` that is expected to point to a directory containing the `mat` files produced by calls to the various `goVARXXX.m` routines described above.
 
-Specifically, to collect predictive scores as compiled in Table 2, use `oosMVlogscores.m` (`oosMVlogscoresLevels.m` and `oosMVlogscoresSVar1` produce corresponding tables for VAR specifications in levels and AR(1) processes for SV, respectively, as shown in the supplementary appendix). 
+Specifically:
 
-To report relative RMSE and CRPS, as in Table 3, call `oosEvaluationTables.m` (and `oosEvaluationTablesSVAR1.m` for the case of SV-AR(1) models as reported in the supplementary appendix).
+- To collect predictive scores as compiled in Table 2, use `oosMVlogscores.m` (`oosMVlogscoresLevels.m` and `oosMVlogscoresSVar1` produce corresponding tables for VAR specifications in levels and AR(1) processes for SV, respectively, as shown in the supplementary appendix). 
 
-To produce the panels of Figure 1 (and additional output for other variables) use `compareSVOt.m`.
+- To report relative RMSE and CRPS, as in Table 3, call `oosEvaluationTables.m` (and `oosEvaluationTablesSVAR1.m` for the case of SV-AR(1) models as reported in the supplementary appendix).
 
-Figure 2 is produces by `compareSVpaths.m`.
+- To produce the panels of Figure 1 (and additional output for other variables) use `compareSVOt.m`.
 
-The panels of Figures 3 and 4 are obtained from `plotPredictiveDensitiesPaper2021.m`. To obtain additional results for other variables, set the variable`doFullYlist` to true in the preamble of the script.
+- Figure 2 is produces by `compareSVpaths.m`.
+
+- The panels of Figures 3 and 4 are obtained from `plotPredictiveDensitiesPaper2021.m`. To obtain additional results for other variables (than those shown in the paper), set the variable `doFullYlist` to `true` in the preamble of the script.
