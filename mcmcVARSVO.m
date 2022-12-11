@@ -33,18 +33,14 @@ else
     theta=[0.1 0.5 100 2];       % hyperparameters of Minnesota prior:
 end
 % [lambda1 lambda2 int lambda3], int is the
-% prior on the intercept. lambda1, lambda2
-% and lambda3 are as in equation (42) with
-% lambda1 the overall shrinkage, lambda2 the
+% prior on the intercept. 
+
+% lambda1 is the overall shrinkage, lambda2 the
 % cross shrinkage and lambda 3 the lag decay
 % (quadratic if =2). Note lambda2~=1 implies
 % the prior becomes asymmetric across eqation,
 % so this would not be implementable in the
 % standard conjugate setup.
-% Minn_pmean = 0;              % Prior mean of the 1-st own lag for each
-% equation. For nonstationary variables, this
-% is usually set to 1. For transformed
-% stationary variables this is set to 0.
 
 burnin            = 2 * ceil(0.1*MCMCdraws);    % burn in
 MCMCreps          = MCMCdraws + burnin;    % total MCMC draws
@@ -151,11 +147,11 @@ for i=1:N
 end
 
 
-% Pai~N(vec(MU_pai),OMEGA_pai), equation 7.
+% Pai~N(vec(MU_pai),OMEGA_pai)
 OMEGA_pai   = diag(vec([sigma_const;reshape(diag(Pi_pv),Klagreg,N)])); % prior variance of Pai
 MU_pai      = [zeros(1,N);reshape(Pi_pm,Klagreg,N)];                   % prior mean of Pai
 
-% A~N(MU_A,inv(OMEGA_A_inv)), equation 8.
+% A~N(MU_A,inv(OMEGA_A_inv))
 MU_A = NaN(N-1,N);
 OMEGA_A_inv = NaN(N-1,N-1,N);
 for i = 2:N;
@@ -163,9 +159,9 @@ for i = 2:N;
     OMEGA_A_inv(1:i-1,1:i-1,i) = 0*eye(i-1);  % prior precision of A
 end;
 
-% PHI~IW(s_PHI,d_PHI), equation 9.
+% PHI~IW(s_PHI,d_PHI)
 d_PHI = N+3;                 % prior dofs
-s_PHI = d_PHI*(0.15*eye(N)) * 12 / np; % prior scale, where eye(N)=PHI_ in equation (9)
+s_PHI = d_PHI*(0.15*eye(N)) * 12 / np; % prior scale, where eye(N)=PHI_ 
 
 % prior on initial states
 Vol_0mean     = zeros(N,1);   % time 0 states prior mean
@@ -246,7 +242,7 @@ while m < MCMCreps % using while, not for loop to allow going back in MCMC chain
     
     % if mod(m,10) == 0; clc; disp(['percentage completed:' num2str(100*m/MCMCreps) '%']); toc; end
     
-    %% STEP 2b: Draw from the conditional posterior of PAI, equation 10.
+    %% STEP 2b: Draw from the conditional posterior of PAI
     stationary=0;
     while stationary==0;
         
@@ -261,7 +257,7 @@ while m < MCMCreps % using while, not for loop to allow going back in MCMC chain
     end
     RESID = Y - X*PAI; % compute the new residuals
     
-    %% STEP 2c: Draw the covariances, equation 11.
+    %% STEP 2c: Draw the covariances
     for ii = 2:N
         % weighted regression to get Z'Z and Z'z (in Cogley-Sargent 2005 notation)
         y_spread_adj=RESID(:,ii)./sqrtht(:,ii);
