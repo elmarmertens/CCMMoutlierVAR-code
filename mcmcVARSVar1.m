@@ -354,7 +354,7 @@ while m < MCMCreps % using while, not for loop to allow going back in MCMC chain
             logdetOmegaY = sum(logSV(:,1)); % logSV stores log variances!
             
             Ydev = sqrtOmegaY \ (yrealized(:,1) - muY);
-            fcstLogscoreDraws(nn,thisdraw) = -.5 * (Nlogtwopi + logdetOmegaY + Ydev' * Ydev);
+            fcstLogscoreDraws(nn,thisdraw) = -.5 * (Nlogtwopi + logdetOmegaY + sum(Ydev.^2));
             
             if ~isempty(ELBbound)
                 

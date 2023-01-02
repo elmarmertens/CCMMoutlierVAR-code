@@ -358,7 +358,7 @@ while m < MCMCreps % using while, not for loop to allow going back in MCMC chain
             outlierSVlog2  = SVobarstates.log2values(ndx(1));
             logdetOmegaY   = sum(logSV(:,1)) + outlierSVlog2; % logSV stores log variances!
             
-            fcstLogscoreDraws(nn,thisdraw) = -.5 * (Nlogtwopi + logdetOmegaY + Ydev' * Ydev);
+            fcstLogscoreDraws(nn,thisdraw) = -.5 * (Nlogtwopi + logdetOmegaY + sum(Ydev.^2));
 
             
             % RB calculations

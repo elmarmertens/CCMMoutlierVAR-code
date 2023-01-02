@@ -268,7 +268,7 @@ while m < MCMCreps % using while, not for loop to allow going back in MCMC chain
             %             % checkdiff(logdetOmegaY, log(det(cholSigma * cholSigma')));
             %
             %             Ydev = sqrtOmegaY \ (yrealized(:,1) - muY);
-            %             fcstLogscoreDraws(nn,thisdraw) = -.5 * (Nlogtwopi + logdetOmegaY + Ydev' * Ydev);
+            %             fcstLogscoreDraws(nn,thisdraw) = -.5 * (Nlogtwopi + logdetOmegaY + sum(Ydev.^2));
             %
             %             if ~isempty(ELBbound)
             %
@@ -318,7 +318,7 @@ while m < MCMCreps % using while, not for loop to allow going back in MCMC chain
         % checkdiff(logdetOmegaY, log(det(cholSigma * cholSigma')));
         
         Ydev = sqrtOmegaY \ (yrealized(:,1) - muY);
-        fcstLogscoreDraws(:,thisdraw) = -.5 * (Nlogtwopi + logdetOmegaY + Ydev' * Ydev);
+        fcstLogscoreDraws(:,thisdraw) = -.5 * (Nlogtwopi + logdetOmegaY + sum(Ydev.^2));
         
         if ~isempty(ELBbound)
             

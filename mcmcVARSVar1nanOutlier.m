@@ -480,7 +480,7 @@ while m < MCMCreps % using while, not for loop to allow going back in MCMC chain
             logdetOmegaY = sum(logSV(:,1)); % logSV stores log variances!
             
             Ydev = sqrtOmegaY \ (yrealized(:,1) - muY);
-            fcstLogscoreDraws(nn,thisdraw) = -.5 * (Nlogtwopi + logdetOmegaY + Ydev' * Ydev);
+            fcstLogscoreDraws(nn,thisdraw) = -.5 * (Nlogtwopi + logdetOmegaY + sum(Ydev.^2));
             
             % compute for non-outlier values of the realizations
             if any(ndxOutlierRealized1)
@@ -493,7 +493,7 @@ while m < MCMCreps % using while, not for loop to allow going back in MCMC chain
                 Ydev = thissqrtOmegaY \ (yrealized(~ndxOutlierRealized1,1) - thismuY);
                 
                 thisN = length(Ydev);
-                fcstLogscoreNaNdraws(nn,thisdraw) = -.5 * (thisN * logtwopi + logdetOmegaY + Ydev' * Ydev);
+                fcstLogscoreNaNdraws(nn,thisdraw) = -.5 * (thisN * logtwopi + logdetOmegaY + sum(Ydev.^2));
 
             else
                 fcstLogscoreNaNdraws(nn,thisdraw) = fcstLogscoreDraws(nn,thisdraw);

@@ -399,7 +399,7 @@ while m < MCMCreps % using while, not for loop to allow going back in MCMC chain
             %             checkdiff(outlierSVlog2, 2 * log(outlierSV(:,1)));
             %             checkdiff(logdetOmegaY, log(det(sqrtOmegaY * sqrtOmegaY')));
    
-            fcstLogscoreDraws(nn,thisdraw) = -.5 * (Nlogtwopi + logdetOmegaY + Ydev' * Ydev);
+            fcstLogscoreDraws(nn,thisdraw) = -.5 * (Nlogtwopi + logdetOmegaY + sum(Ydev.^2));
             
             % RB calculations
             % a) recompute cond normals
